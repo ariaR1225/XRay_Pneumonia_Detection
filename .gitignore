@@ -2,6 +2,7 @@
 xray/
 venv/
 env/
+chest_xray/
 
 # Python
 __pycache__/
