@@ -30,3 +30,8 @@ build/
 # Local development settings
 *.log
 .DS_Storeresults/best_model.keras
+*.keras
+
+# Add the misc folder to .gitignore
+misc/
+misc/*
