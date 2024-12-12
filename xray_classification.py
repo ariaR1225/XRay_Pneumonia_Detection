@@ -68,8 +68,6 @@ class DataGeneratorWithProgress:
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train X-ray classification model')
-    parser.add_argument('--use_augmentation', type=bool, default=False,
-                      help='Whether to use augmented normal data')
     parser.add_argument('--image_size', type=int, default=224,
                       help='Image size for training')
     parser.add_argument('--batch_size', type=int, default=32,
@@ -119,29 +117,9 @@ def create_data_generators(image_size, batch_size):
     
     return train_datagen, val_test_datagen
 
-def prepare_datasets(data_dir, train_datagen, val_test_datagen, image_size, batch_size, use_augmentation):
-    train_dir = os.path.join(data_dir, 'preprocessed/train')
-    normal_dir = os.path.join(train_dir, 'NORMAL')
-    normal_aug_dir = os.path.join(train_dir, 'NORMAL_augmented')
-    pneumonia_dir = os.path.join(train_dir, 'PNEUMONIA')
-    
-    if use_augmentation:
-        temp_dir = tempfile.mkdtemp()
-        combined_normal_dir = os.path.join(temp_dir, 'NORMAL')
-        os.makedirs(combined_normal_dir, exist_ok=True)
-        
-        for src_dir in [normal_dir, normal_aug_dir]:
-            if os.path.exists(src_dir):
-                for filename in os.listdir(src_dir):
-                    shutil.copy2(
-                        os.path.join(src_dir, filename),
-                        os.path.join(combined_normal_dir, filename)
-                    )
-        
-        normal_dir = combined_normal_dir
-
+def prepare_datasets(data_dir, train_datagen, val_test_datagen, image_size, batch_size):
     train_generator = train_datagen.flow_from_directory(
-        train_dir,
+        os.path.join(data_dir, 'preprocessed/train'),
         target_size=(image_size, image_size),
         batch_size=batch_size,
         class_mode='binary',
@@ -242,8 +220,7 @@ def train_model():
         train_datagen,
         val_test_datagen,
         args.image_size,
-        args.batch_size,
-        args.use_augmentation
+        args.batch_size
     )
     
     print("Building model...")
